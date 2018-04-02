@@ -18,7 +18,7 @@ module.exports = {
       host: "localhost",
       port: 8545,
       network_id: "3", // Ropsten ID 3
-      from: "0x000a4cD1E4D38eC15eF798BB7604330944974eff", // account from which to deploy
+      from: "0xA876E8D0a649cD887D6DE83eef0193CC61eB3AE1", // account from which to deploy
       gas: 4700000
      }
   }

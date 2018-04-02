@@ -1,0 +1,35 @@
+.equal {
+    display: flex;
+    display: -webkit-flex;
+    flex-wrap: wrap;
+}
+
+.nav-tabs {
+    border: 1px 0px 0px 0px solid red;
+}
+
+.nav-tabs>li.active>a, .nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover {
+    border: 1px solid #fff;
+    border-color: #252830;
+    color: #1997C6;
+    border-bottom-color: #1997C6;
+    border-bottom-width: 3px;
+    background-color: #252830;
+}
+
+.nav-tabs>li>a, .nav-tabs>li>a:focus, .nav-tabs>li>a:hover {
+    color: #fff;
+    border-color: #252830;
+    background-color: #252830;
+}
+
+.nav-tabs>li>a:hover {
+    color: #1997C6;
+    border-color: #252830;
+    background-color: #252830;
+}
+
+body {
+    background-color: #252830;
+}
+
