@@ -13,7 +13,7 @@ var minioClient = new Minio.Client({
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 app.use(bodyParser.json());
 // simple cors
 app.use(function(req, res, next) {
@@ -49,10 +49,10 @@ router.post('/upload/:filename', function(req, res) {
             minioClient.makeBucket('mybucket', 'us-east-1', function(err) {
                 if (err) return res.status(500).send(err);
                 
-                upload(res, req.params.filename, req.body.originalname + '!#$#!' + req.body.content);
+                upload(res, req.params.filename, req.body.originalname + '!#$#!' + req.body.type + '!#$#!' + req.body.content);
               });
         }else{
-            upload(res, req.params.filename, req.body.originalname + '!#$#!' + req.body.content);
+            upload(res, req.params.filename, req.body.originalname + '!#$#!' + req.body.type + '!#$#!' + req.body.content);
         }
     });
 });
@@ -71,7 +71,7 @@ router.get('/upload/:filename', function(req, res) {
         });
         dataStream.on('end', function() {
             var result = content.split('!#$#!');
-            res.json({originalname: result[0], content: result[1]});
+            res.json({originalname: result[0], type: result[1], content: result[2]});
         });
         dataStream.on('error', function(e) {
             res.status(500).send(err);

@@ -45,6 +45,7 @@ App = {
       if(App.account != undefined){
         // retrieve my properties
         App.loadMyProperties();
+        App.watchEvent();
       }
     });
 
@@ -211,6 +212,36 @@ App = {
     new ClipboardJS('.clipboard');
   },
 
+  watchEvent: function() {
+    var eventListener = function(result) {
+      console.log(result);
+    };
+
+    App.contracts.Properties.deployed().then(function(instance) {
+      propertiesInstance = instance;
+  
+      propertiesInstance.Register().watch(function(e, result){
+        eventListener(result);
+      });
+
+      propertiesInstance.Sell().watch(function(e, result){
+        eventListener(result);
+      });
+
+      propertiesInstance.CancelSell().watch(function(e, result){
+        eventListener(result);
+      });
+
+      propertiesInstance.Offer().watch(function(e, result){
+        eventListener(result);
+      });
+
+      propertiesInstance.Transfer().watch(function(e, result){
+        eventListener(result);
+      });
+    })
+  },
+
   handleRegister: function() {
     var name = $("#registerPropertyRow #inputName").val();
     var desc = $("#registerPropertyRow #inputDesc").val();
@@ -242,7 +273,7 @@ App = {
             var encrypted = cryptico.encrypt(e.target.result, cryptico.publicKeyString(cryptico.generateRSAKey(pass, 512)));
             console.log(encrypted.cipher);
 
-            $.post('http://localhost:8080/api/upload/' + hash, {originalname: file.name, content: encrypted.cipher}, function(data){
+            $.post('http://localhost:8080/api/upload/' + hash, {originalname: file.name, type: file.type, content: encrypted.cipher}, function(data){
               var propertiesInstance;
       
               web3.eth.getAccounts(function(error, accounts) {
@@ -271,7 +302,7 @@ App = {
       });
     };
 
-    reader.readAsBinaryString(file);
+    reader.readAsDataURL(file);
   },
 
   handleHistory: function(e) {
@@ -283,11 +314,11 @@ App = {
     web3.eth.getBlockNumber(function(e, r){
       var latest = r;
 
-      for(var i = 2953337; i <= latest; i++){
+      for(var i = 2957638; i <= latest; i++){
         web3.eth.getBlock(i, true, function(e, r){
           for(var j = 0; r.transactions && j < r.transactions.length; j++){
             if(r.transactions[j].to == App.contracts.Properties.address){
-              if(r.transactions[j].input == ('0x750225d0' + web3.padLeft(web3.toHex(propertyId).substring(2), 64))){
+              if(r.transactions[j].input == ('0xdec4b4b8' + web3.padLeft(web3.toHex(propertyId).substring(2), 64))){
                 $('#ownersModal .modal-body .content').append('<i class="fa fa-angle-double-down" style="font-size:24px"></i><br/>');
                 $('#ownersModal .modal-body .content').append('<span><i class="fa fa-address-card-o"></i> ' + r.transactions[j].from + '</span><br/>');
                 $('#ownersModal .modal-body .content').append('<span><i class="fa fa-calendar-check-o"></i>   ' + new Date(r.timestamp * 1000) + '</span><br/>');
@@ -459,7 +490,7 @@ App = {
             $.get('http://localhost:8080/api/upload/' + id + 'pk', function(pkdata){
               var encrypted = cryptico.encrypt(decrypted.plaintext, pkdata.content);
 
-              $.post('http://localhost:8080/api/upload/' + id, {originalname: data.originalname, content: encrypted.cipher}, function(data){
+              $.post('http://localhost:8080/api/upload/' + id, {originalname: data.originalname, type: data.type, content: encrypted.cipher}, function(data){
                 var propertiesInstance;
       
                 web3.eth.getAccounts(function(error, accounts) {
@@ -502,8 +533,12 @@ App = {
         return console.log('wrong pass phrase, can not be confirmed');
       }
 
-      console.log(data.originalname);
-      console.log(decrypted.plaintext);
+      var arr = decrypted.plaintext.split(','), mime = arr[0].match(/:(.*?);/)[1],
+      bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+      while(n--){
+          u8arr[n] = bstr.charCodeAt(n);
+      }
+      saveAs(new Blob([u8arr], {type:mime}), data.originalname);  
     });
   }
 
