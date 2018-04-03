@@ -74,25 +74,32 @@ contract Properties {
      * id (timestamp of creation for now) of registered property is returned
      */
     function register(bytes32 _name, bytes32 _desc, bytes32 _hash) public returns (bytes32) {
-        uint256 currentSize = properties.length;
+        if(propertyOwnerMap[_hash] == address(0)) {
+            uint256 currentSize = properties.length;
 
-        properties.push(Property({
-            creator: msg.sender, 
-            name: _name, 
-            desc: _desc, 
-            id: _hash, 
-            owner: msg.sender, 
-            saleStatus: SaleStatus.OnHold, 
-            sellingTo: address(0),
-            askingPrice: 0
-        }));
-        
-        require(properties.length == currentSize + 1);
+            properties.push(Property({
+                creator: msg.sender, 
+                name: _name, 
+                desc: _desc, 
+                id: _hash, 
+                owner: msg.sender, 
+                saleStatus: SaleStatus.OnHold, 
+                sellingTo: address(0),
+                askingPrice: 0
+            }));
+            
+            require(properties.length == currentSize + 1);
 
-        propertyIndexMap[_hash] = currentSize;
+            propertyIndexMap[_hash] = currentSize;
 
-        propertyOwnerMap[_hash] = msg.sender;
-        
+            propertyOwnerMap[_hash] = msg.sender;
+        }else{
+            require(propertyOwnerMap[_hash] == msg.sender);
+
+            properties[propertyIndexMap[_hash]].name = _name;
+            properties[propertyIndexMap[_hash]].desc = _desc;
+        }
+
         emit Register(properties[propertyIndexMap[_hash]].creator, properties[propertyIndexMap[_hash]].name, properties[propertyIndexMap[_hash]].desc, properties[propertyIndexMap[_hash]].id, properties[propertyIndexMap[_hash]].owner, properties[propertyIndexMap[_hash]].saleStatus);
 
         return _hash;
